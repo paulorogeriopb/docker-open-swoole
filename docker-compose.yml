@@ -1,0 +1,23 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    ports:
+      - "8001:8000"
+    command: >
+      /bin/sh -c "
+      php public/server.php &
+      while true; do
+        inotifywait -e modify,create,delete -r /app &&
+        pkill -f 'php public/server.php';
+        php public/server.php &
+      done"
+    networks:
+      - swoole
+
+networks:
+  swoole:
+    driver: bridge
